@@ -1,9 +1,10 @@
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile, File, Query
 from pymongo import MongoClient
 from services.podcast_service import get_all_podcasts, add_podcast
 from services.job_service import get_all_jobs, add_job
+from services.s3_service import upload_file, get_presigned_url
 
 load_dotenv()
 
@@ -32,3 +33,17 @@ def get_jobs():
 @app.post("/jobs")
 def post_job(job: dict):
     return add_job(mongo_db[MONGO_JOBS_COLLECTION], job)
+
+@app.post("/s3_upload")
+async def upload_to_s3(file: UploadFile = File(...)):
+    file_location = f"temp_{file.filename}"
+    with open(file_location, "wb") as f:
+        f.write(await file.read())
+    url = upload_file(file_location, file.filename)
+    os.remove(file_location)
+    return {"url": url}
+
+@app.get("/s3_file")
+def get_s3_file(key: str = Query(..., description="S3 object key (filename)")):
+    url = get_presigned_url(key)
+    return {"url": url}
