@@ -4,3 +4,15 @@ The podcast only has 2 entities, a Host and a Guest.
 Remove references of any additional entities, especially if it seems like the agents hallucinated or diverged.
 Keep the podcast tight and engaging.
 transcript:\n\n{raw_script}
+
+Follow this exact schema:
+{{
+  "conversations":[
+    {{
+        "host": <string> # host question/comments
+        "guest": <string> # guest comments
+    }},...
+  ]
+}}
+
+This conversation will be used to generate audio output
