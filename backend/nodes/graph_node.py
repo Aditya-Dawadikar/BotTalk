@@ -1,23 +1,26 @@
 import json
 import time
 from tts.gemini_tts import gemini_generate_tts
+from minimax_tts import minimax_generate_tts
 from agents.thumbnail_agent import create_thumbnail_from_description
 
 from agents.flow_planner import create_flow_planner_chain, get_checklist
 from agents.script_editor import create_script_editor
-from agents.host_agent import create_agent as create_host
-from agents.guest_agent import create_agent as create_guest
+from agents.host_agent import create_host_agent
+from agents.guest_agent import create_guest_agent
 from agents.summerizer import create_summerizer
+from agents.tavily_agent import create_tavily_agent, get_tavily_search_results
 from mcp.context import create_memory
 
 from utils import parse_gemini_planner_output, parse_gemini_json_output
 
 memory = create_memory()
 flow_chain = create_flow_planner_chain()
-host = create_host("host", "prompts/host_prompt.txt", memory)
-guest = create_guest("guest", "prompts/guest_prompt.txt", memory)
+host = create_host_agent("prompts/host_prompt.txt", memory)
+guest = create_guest_agent("prompts/guest_prompt.txt", memory)
 editor = create_script_editor()    
 summarizer = create_summerizer()
+tavily_agent = create_tavily_agent()
 
 def planner_node(state):
     topic = state["topic"]
@@ -29,11 +32,16 @@ def planner_node(state):
     print("✅ Podcast Outline Generated")
 
     return {"planner_output": podcast_plan,
-            "script_segments": podcast_plan["segments"]}
+            "script_segments": podcast_plan["segments"],
+            "web_search_query": podcast_plan["web_search_query"]}
 
 def host_guest_node(state):
     segments = state["script_segments"]
+    tavily_research = state["tavily_research"]
+
     turns = []
+
+    turns.append({"speaker": "Tavily Research Agent", "text": tavily_research})
 
     for i, item in enumerate(segments):
         for id, point in enumerate(item.get("key_points",[])):
@@ -41,15 +49,27 @@ def host_guest_node(state):
 
             time.sleep(5)
 
+            print(turns)
+
+            chat_history_str = "\n".join(f"{t['speaker']}: {t['text']}" for t in turns)
+
             # Host
-            host_response = host.run({"segment": seg, "chat_history": turns})
+            host_response = host.invoke({
+                "segment": seg,
+                "chat_history": chat_history_str
+            })
             print(f"\n\n[HOST]: {host_response}")
             turns.append({"speaker": "Host", "text": host_response})
 
             time.sleep(5)
 
+            chat_history_str = "\n".join(f"{t['speaker']}: {t['text']}" for t in turns)
+
             # Guest
-            guest_response = guest.run({"segment": seg, "chat_history": turns})
+            guest_response = guest.invoke({
+                "segment": seg,
+                "chat_history": chat_history_str
+            })
             print(f"\n\n[GUEST]: {guest_response}")
             turns.append({"speaker": "Guest", "text": guest_response})
 
@@ -66,7 +86,17 @@ def editor_node(state):
     
     print("✅ Podcast Script Generated")
 
-    return {"final_script": cleaned}
+    if cleaned.startswith("```json"):
+        cleaned = cleaned.removeprefix("```json").strip()
+    if cleaned.endswith("```"):
+        cleaned = cleaned.removesuffix("```").strip()
+
+    data_dict = json.loads(cleaned)
+
+    with open("outputs/final_script.json", "w") as f:
+        f.write(json.dumps(data_dict))
+
+    return {"final_script": data_dict}
 
 def summarizer_node(state):
     content = state["final_script"]
@@ -81,7 +111,8 @@ def summarizer_node(state):
 
 def tts_node(state):
     script = state["final_script"]
-    gemini_generate_tts(script, "outputs/final.wav")
+    # gemini_generate_tts(script, "outputs/final.wav")
+    minimax_generate_tts(script, "outputs/final.wav")
 
     print("✅ Podcast Audio Generated")
 
@@ -94,3 +125,28 @@ def thumbnail_node(state):
     print("✅ Podcast Thumbnail Generated")
 
     return {"thumbnail_generated": True}
+
+def tavily_node(state):
+    tavily_query = state["web_search_query"]
+
+    input = {
+        "query":tavily_query,
+        "topic":"general",
+        "search_depth":"basic",
+        "chunks_per_source":3,
+        "max_results":10,
+        "include_answer":True
+    }
+
+    res = get_tavily_search_results(input)
+
+    facts_str = res.get("answer","")
+
+    print(facts_str)
+
+    print("✅ Tavily Research Done")
+
+    with open("outputs/tavily_research_facts.json", "w") as f:
+        f.write(json.dumps(facts_str))
+
+    return {"tavily_research": facts_str}
