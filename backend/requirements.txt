@@ -1,0 +1,10 @@
+langchain
+langchain-google-genai
+google-generativeai
+dotenv
+openai
+langchain-community
+wave
+google-genai
+pillow
+langgraph

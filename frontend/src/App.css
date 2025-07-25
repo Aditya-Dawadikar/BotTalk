@@ -1,0 +1,39 @@
+:root {
+  /* Background Colors */
+  --color-bg-primary: #000000;     /* Main background (deep black) */
+  --color-bg-secondary: #121212;   /* Secondary background */
+  --color-bg-hover: #1a1a1a;       /* Hover states */
+  --color-bg-card: #181818;        /* Card background */
+
+  /* Accent Colors */
+  --color-accent: #1db954;         /* Spotify Green */
+  --color-accent-hover: #1ed760;   /* Slightly lighter green for hover */
+
+  /* Text Colors */
+  --color-text-primary: #ffffff;   /* Main text */
+  --color-text-secondary: #b3b3b3; /* Secondary text */
+  --color-text-muted: #737373;     /* Muted text */
+
+  /* Border & Divider */
+  --color-border: #282828;
+  --color-divider: #404040;
+
+  /* Shadows */
+  --shadow-elevation: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+  /* Button Colors */
+  --color-btn-primary-bg: var(--color-accent);
+  --color-btn-primary-text: #ffffff;
+  --color-btn-secondary-bg: #333333;
+  --color-btn-secondary-text: #ffffff;
+
+  /* Player Colors */
+  --color-player-bg: #181818;
+  --color-progress-bg: #404040;
+  --color-progress-fill: var(--color-accent);
+
+  /* Status Colors */
+  --color-success: #1db954;
+  --color-warning: #f1c40f;
+  --color-error: #e74c3c;
+}
