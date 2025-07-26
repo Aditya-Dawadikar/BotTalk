@@ -11,6 +11,7 @@ from typing_extensions import TypedDict
 from typing import Any
 
 class State(TypedDict):
+    job_id: str
     topic: str
     planner_output: Any
     script_segments: Any

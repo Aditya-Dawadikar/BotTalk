@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, Query
 from pymongo import MongoClient
 from services.podcast_service import get_all_podcasts, add_podcast
-from services.job_service import get_all_jobs, add_job
+from services.job_service import get_all_jobs, add_job, update_job_by_id
 from services.s3_service import upload_file, get_presigned_url
 
 load_dotenv()
@@ -33,6 +33,10 @@ def get_jobs():
 @app.post("/jobs")
 def post_job(job: dict):
     return add_job(mongo_db[MONGO_JOBS_COLLECTION], job)
+
+@app.put("/jobs")
+def put_job(update_payload:dict):
+    return update_job_by_id(mongo_db[MONGO_JOBS_COLLECTION],update_payload.get("podcast_id") ,update_payload.get("update_fields"))
 
 @app.post("/s3_upload")
 async def upload_to_s3(file: UploadFile = File(...)):
