@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -12,18 +12,58 @@ import PauseIcon from "@mui/icons-material/Pause";
 
 export default function PodcastView() {
   const [podcast] = useState({
-    title: "The Future of AI",
-    description: "A deep conversation between AI and a philosopher on the future of artificial intelligence.",
-    audioUrl: "/audio/sample.mp3", // Replace with actual audio path
-    coverUrl: "https://via.placeholder.com/800x400?text=Podcast+Cover",
+    title: "Netflix Binge watching",
+    description:
+      "A deep conversation about binge watching patterns on netflix",
+    audioUrl: "http://localhost:8000/outputs/sample.wav", // Replace with API or streaming URL
+    coverUrl: "http://localhost:8000/outputs/thumbnail.png",
     characters: ["Host AI", "Guest Philosopher"],
     date: "July 25, 2025",
   });
 
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
 
-  const togglePlay = () => setIsPlaying(!isPlaying);
+  const togglePlay = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleProgressChange = (_: Event, value: number | number[]) => {
+    const audio = audioRef.current;
+    if (!audio || typeof value !== "number") return;
+    audio.currentTime = (value / 100) * duration;
+    setProgress(value);
+  };
+
+  // Sync progress and duration
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const updateProgress = () => {
+      setProgress((audio.currentTime / audio.duration) * 100 || 0);
+    };
+    const setAudioDuration = () => {
+      setDuration(audio.duration || 0);
+    };
+
+    audio.addEventListener("timeupdate", updateProgress);
+    audio.addEventListener("loadedmetadata", setAudioDuration);
+
+    return () => {
+      audio.removeEventListener("timeupdate", updateProgress);
+      audio.removeEventListener("loadedmetadata", setAudioDuration);
+    };
+  }, []);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
@@ -42,7 +82,8 @@ export default function PodcastView() {
           sx={{
             position: "absolute",
             inset: 0,
-            background: "linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.9))",
+            background:
+              "linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.9))",
           }}
         />
         <Typography
@@ -60,7 +101,15 @@ export default function PodcastView() {
       </Box>
 
       {/* Content Section */}
-      <Box sx={{ display: "flex", flex: 1, p: 3, gap: 3, backgroundColor: "var(--color-bg-primary)" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flex: 1,
+          p: 3,
+          gap: 3,
+          backgroundColor: "var(--color-bg-primary)",
+        }}
+      >
         {/* Audio Player */}
         <Box sx={{ flex: 2 }}>
           <Paper
@@ -70,7 +119,10 @@ export default function PodcastView() {
               backgroundColor: "var(--color-bg-card)",
             }}
           >
-            <Typography variant="h6" sx={{ mb: 2, color: "var(--color-text-primary)" }}>
+            <Typography
+              variant="h6"
+              sx={{ mb: 2, color: "var(--color-text-primary)" }}
+            >
               Now Playing
             </Typography>
             <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
@@ -85,14 +137,14 @@ export default function PodcastView() {
               </IconButton>
               <Slider
                 value={progress}
-                onChange={(_, val) => setProgress(val as number)}
+                onChange={handleProgressChange}
                 sx={{
                   flex: 1,
                   color: "var(--color-accent)",
                 }}
               />
             </Stack>
-            <audio id="podcast-audio" src={podcast.audioUrl} hidden />
+            <audio ref={audioRef} src={podcast.audioUrl} preload="metadata" />
           </Paper>
         </Box>
 
@@ -112,7 +164,10 @@ export default function PodcastView() {
           <Typography variant="body2" sx={{ mb: 2 }}>
             {podcast.description}
           </Typography>
-          <Typography variant="subtitle2" sx={{ mb: 1, color: "var(--color-text-secondary)" }}>
+          <Typography
+            variant="subtitle2"
+            sx={{ mb: 1, color: "var(--color-text-secondary)" }}
+          >
             Characters:
           </Typography>
           <ul style={{ margin: 0, paddingLeft: "20px" }}>
@@ -120,7 +175,10 @@ export default function PodcastView() {
               <li key={i}>{char}</li>
             ))}
           </ul>
-          <Typography variant="caption" sx={{ display: "block", mt: 2, color: "var(--color-text-secondary)" }}>
+          <Typography
+            variant="caption"
+            sx={{ display: "block", mt: 2, color: "var(--color-text-secondary)" }}
+          >
             Released on {podcast.date}
           </Typography>
         </Box>
