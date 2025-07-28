@@ -8,5 +8,7 @@ pillow
 langgraph
 fastapi
 uvicorn
-tavily-python
-langchain-tavily
+pydantic
+pymongo
+boto3
+python-multipart

@@ -5,7 +5,6 @@ from google.genai import types
 from dotenv import load_dotenv
 
 load_dotenv()
-# genai.configure(api_key=os.getenv("SJSU_GEMINI_API_KEY"))
 
 client = genai.Client()
 
