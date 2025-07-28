@@ -7,7 +7,6 @@ import os
 import dotenv
 dotenv.load_dotenv()
 
-# genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 client = genai.Client()
 
 def generate_image_prompt_from_description(description: str) -> str:
@@ -16,10 +15,7 @@ def generate_image_prompt_from_description(description: str) -> str:
 \"\"\"{description}\"\"\"
 
 The image should be:
-- Modern and minimal
-- 3D or stylized vector-style preferred
-- Use bright, futuristic colors
-- Avoid text in the image
+- Like a Quentin Tarantino movie poster
 
 Return a creative, detailed visual prompt.
 """
@@ -31,8 +27,6 @@ def create_thumbnail_from_description(description: str, output_path="outputs/thu
         contents=generate_image_prompt_from_description(description)
     )
     image_prompt = image_prompt_response.text.strip()
-
-    print(f"🧠 Gemini image prompt:\n{image_prompt}\n")
 
     # Step 2: Generate image from visual prompt
     response = client.models.generate_content(

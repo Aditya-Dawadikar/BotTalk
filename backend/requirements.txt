@@ -4,7 +4,12 @@ google-generativeai
 dotenv
 openai
 langchain-community
-wave
 google-genai
 pillow
 langgraph
+fastapi
+uvicorn
+pydantic
+pymongo
+boto3
+python-multipart
