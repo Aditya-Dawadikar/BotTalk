@@ -1,12 +1,8 @@
 import os
 import boto3
-<<<<<<< HEAD
-from dotenv import load_dotenv
-=======
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 import asyncio
->>>>>>> 5b5b4e5cacf1477ae2e0a9394b03a3a5446a186a
 
 load_dotenv()
 
@@ -15,10 +11,6 @@ AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_REGION = os.getenv("AWS_REGION")
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 5b5b4e5cacf1477ae2e0a9394b03a3a5446a186a
 s3_client = boto3.client(
     "s3",
     aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -30,25 +22,15 @@ def upload_file(file_path, key):
     s3_client.upload_file(file_path, S3_BUCKET_NAME, key)
     return f"https://{S3_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{key}"
 
-<<<<<<< HEAD
-# def download_file(key, download_path):
-#     s3_client.download_file(S3_BUCKET_NAME, key, download_path)
-
-=======
->>>>>>> 5b5b4e5cacf1477ae2e0a9394b03a3a5446a186a
 def upload_folder(folder_path, s3_prefix=""):
     for root, dirs, files in os.walk(folder_path):
         for file in files:
             local_path = os.path.join(root, file)
             relative_path = os.path.relpath(local_path, folder_path)
             s3_key = os.path.join(s3_prefix, relative_path).replace("\\", "/")
-<<<<<<< HEAD
-            s3_client.upload_file(local_path, S3_BUCKET_NAME, s3_key)
-=======
 
             s3_client.upload_file(local_path, S3_BUCKET_NAME, s3_key)
             print(f"Uploaded file: {file}")
->>>>>>> 5b5b4e5cacf1477ae2e0a9394b03a3a5446a186a
             
 def download_folder(s3_prefix, local_folder):
     paginator = s3_client.get_paginator('list_objects_v2')
@@ -60,14 +42,6 @@ def download_folder(s3_prefix, local_folder):
             os.makedirs(os.path.dirname(local_path), exist_ok=True)
             s3_client.download_file(S3_BUCKET_NAME, s3_key, local_path)
 
-<<<<<<< HEAD
-def get_presigned_url(key, expires_in=36000):
-    return s3_client.generate_presigned_url(
-        'get_object',
-        Params={'Bucket': S3_BUCKET_NAME, 'Key': key},
-        ExpiresIn=expires_in
-    )
-=======
 def generate_signed_urls(prefix: str, expiration: int = 3600):
     """
     Generate signed URLs for all files under a given S3 prefix.
@@ -142,4 +116,3 @@ def list_s3_files(prefix: str=""):
         return []
 
     return files
->>>>>>> 5b5b4e5cacf1477ae2e0a9394b03a3a5446a186a
