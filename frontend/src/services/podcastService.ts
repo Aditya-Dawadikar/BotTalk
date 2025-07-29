@@ -2,10 +2,10 @@ import axios from "axios";
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
-export const createPodcast = async(topic:String) => {
+export const createPodcast = async(podcast_description:any) => {
   try{
-    const response = await axios.post(`${SERVER_URL}/agent/podcast?topic=${topic}`, {})
-    console.log(response.data)
+    const response = await axios.post(`${SERVER_URL}/agent/podcast?topic=${podcast_description.topic}`, {})
+    // console.log(response.data)
     return response.data
   }catch(e){
     console.log(e)
@@ -28,7 +28,7 @@ export const fetchPodcasts = async () => {
 export const fetchPodcastById = async (podcastId: String) => {
   try{
     const response = await axios.get(`${SERVER_URL}/podcast/${podcastId}`)
-    console.log(response)
+    // console.log(response)
     return response.data
 
   }catch(e){
@@ -40,7 +40,7 @@ export const fetchPodcastById = async (podcastId: String) => {
 export const fetchJobs = async () =>{
   try{
     const response = await axios.get(`${SERVER_URL}/jobs`)
-    console.log(response)
+    // console.log(response)
     return response.data
   }catch(e){
     console.log(e)

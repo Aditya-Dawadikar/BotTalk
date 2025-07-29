@@ -23,8 +23,8 @@ def convert_id_to_str(doc):
     return doc
 
 
-def get_all_podcasts():
-    podcasts = [convert_id_to_str(doc) for doc in PODCAST_COLLECTION.find({})]
+def get_all_podcasts(status: str="COMPLETE"):
+    podcasts = [convert_id_to_str(doc) for doc in PODCAST_COLLECTION.find({"status": status})]
 
     cover_paths = []
     for podcast in podcasts:
