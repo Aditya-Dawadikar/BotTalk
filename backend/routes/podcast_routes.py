@@ -39,9 +39,16 @@ def fetch_podcast_by_id(podcast_id: str):
             s3_base_url = podcast.get("base_path")
             urls = generate_signed_urls(s3_base_url)
 
+            file_urls = []
+            for key,val in urls.items():
+                file_urls.append({
+                    "file": key,
+                    "url": val
+                })
+
             data = {
                 "podcast": podcast,
-                "file_urls": urls
+                "file_urls": file_urls
             }
 
         return data

@@ -15,40 +15,34 @@ mongo_db = mongo_client[MONGO_DB_NAME]
 
 JOBS_COLLECTION = mongo_db[MONGO_JOBS_COLLECTION]
 
-def get_all_jobs():
-    return list(JOBS_COLLECTION.find({}, {"_id": 0}))
+
+def convert_id_to_str(doc):
+    if doc and "_id" in doc:
+        doc["_id"] = str(doc["_id"])
+    return doc
+
+
+def get_all_jobs(status: str = "PENDING"):
+    cursor = JOBS_COLLECTION.find({"status": status})
+    return [convert_id_to_str(doc) for doc in cursor]
+
 
 def get_job_by_id(document_id: str):
-    """
-    Fetch a job document by its _id.
-
-    Args:
-        document_id (str): The string representation of the ObjectId.
-
-    Returns:
-        dict or None: The job document with _id as string, or None if not found.
-    """
     try:
         obj_id = ObjectId(document_id)
     except Exception:
         raise ValueError("Invalid job ID format")
 
     job = JOBS_COLLECTION.find_one({"_id": obj_id})
-    if not job:
-        return None
-
-    job["_id"] = str(job["_id"])
-    return dict(job)
+    return convert_id_to_str(job) if job else None
 
 
-def add_job(job:dict):
+def add_job(job: dict):
     result = JOBS_COLLECTION.insert_one(job)
     return {"inserted_id": str(result.inserted_id)}
 
+
 def update_job_by_id(document_id: str, update_fields: dict):
-    """
-    Update a job by its _id and return the updated document as a dict.
-    """
     try:
         obj_id = ObjectId(document_id)
     except Exception:
@@ -59,9 +53,4 @@ def update_job_by_id(document_id: str, update_fields: dict):
         {"$set": update_fields},
         return_document=ReturnDocument.AFTER
     )
-    if not updated_doc:
-        return None
-
-    # Convert ObjectId to string for JSON compatibility
-    updated_doc["_id"] = str(updated_doc["_id"])
-    return dict(updated_doc)
+    return convert_id_to_str(updated_doc) if updated_doc else None

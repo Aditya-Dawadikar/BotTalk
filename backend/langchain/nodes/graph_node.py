@@ -10,6 +10,7 @@ from backend.langchain.agents.guest_agent import create_agent as create_guest
 from backend.langchain.agents.summerizer import create_summerizer
 from backend.langchain.mcp.context import create_memory
 from backend.services.job_service import update_job_by_id
+from backend.services.podcast_service import update_podcast_by_id
 
 from backend.utils import parse_gemini_planner_output, parse_gemini_json_output
 
@@ -102,6 +103,7 @@ def editor_node(state):
 
 def summarizer_node(state):
     job_id=state["job_id"]
+    podcast_id=state["podcast_id"]
     content = state["final_script"]
     OUTPUT_FOLDER = state["output_folder"]
     OUTPUT_FOLDER = os.path.join(OUTPUT_FOLDER, job_id)
@@ -114,6 +116,10 @@ def summarizer_node(state):
 
     update_job_by_id(document_id=job_id, update_fields={
         "summary_generated": "yes"
+    })
+
+    update_podcast_by_id(document_id=podcast_id, update_fields={
+        "meta_data": parsed_summary
     })
 
     print("✅ Podcast Summary Generated")

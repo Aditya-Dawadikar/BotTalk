@@ -11,6 +11,7 @@ from typing import Any
 
 class State(TypedDict):
     job_id: str
+    podcast_id: str
     output_folder: str
     topic: str
     planner_output: Any

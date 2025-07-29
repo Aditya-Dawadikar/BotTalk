@@ -15,12 +15,7 @@ interface CreatePodcastFormProps {
     open: boolean;
     onClose: () => void;
     onSubmit: (data: {
-        title: string;
-        description: string;
-        host_name: string;
-        host_personality: string;
-        guest_name: string;
-        guest_personality: string;
+        topic: string;
     }) => void;
 }
 
@@ -30,12 +25,7 @@ export default function CreatePodcastForm({
     onSubmit,
 }: CreatePodcastFormProps) {
     const [formData, setFormData] = useState({
-        title: "",
-        description: "",
-        host_name: "",
-        host_personality: "",
-        guest_name: "",
-        guest_personality: "",
+        topic: "",
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -66,6 +56,18 @@ export default function CreatePodcastForm({
                 </IconButton>
             </DialogTitle>
             <DialogContent dividers>
+                <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    <TextField
+                        label="Podcast Topic"
+                        name="topic"
+                        value={formData.topic}
+                        onChange={handleChange}
+                        fullWidth
+                        variant="outlined"
+                    />
+                </Box>
+            </DialogContent>
+            {/* <DialogContent dividers>
                 <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                     <TextField
                         label="Podcast Title"
@@ -118,7 +120,7 @@ export default function CreatePodcastForm({
                         variant="outlined"
                     />
                 </Box>
-            </DialogContent>
+            </DialogContent> */}
             <DialogActions>
                 <Button onClick={onClose} color="inherit">
                     Cancel
