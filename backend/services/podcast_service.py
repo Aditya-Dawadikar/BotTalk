@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from pymongo import MongoClient, ReturnDocument
 from bson import ObjectId
+from backend.services.s3_service import generate_signed_urls_batch
 
 load_dotenv()
 
@@ -15,40 +16,45 @@ mongo_db = mongo_client[MONGO_DB_NAME]
 
 PODCAST_COLLECTION = mongo_db[MONGO_PODCAST_COLLECTION]
 
-def get_all_podcasts():
-    return list(PODCAST_COLLECTION.find({}, {"_id": 0}))
+
+def convert_id_to_str(doc):
+    if "_id" in doc:
+        doc["_id"] = str(doc["_id"])
+    return doc
+
+
+def get_all_podcasts(status: str="COMPLETE"):
+    podcasts = [convert_id_to_str(doc) for doc in PODCAST_COLLECTION.find({"status": status})]
+
+    cover_paths = []
+    for podcast in podcasts:
+        podcast["cover_path"] = f"{podcast.get('base_path')}/{podcast.get('thumbnail')}"
+        cover_paths.append(podcast.get("cover_path"))
+
+    signed_urls = generate_signed_urls_batch(cover_paths)
+
+    for podcast in podcasts:
+        podcast["cover_url"] = signed_urls[podcast["cover_path"]]
+
+    return podcasts
+
 
 def add_podcast(podcast):
     result = PODCAST_COLLECTION.insert_one(podcast)
     return {"inserted_id": str(result.inserted_id)}
 
+
 def get_podcast_by_id(document_id: str):
-    """
-    Find a podcast document by its _id.
-
-    Args:
-        document_id (str): The string representation of the ObjectId.
-
-    Returns:
-        dict or None: The podcast document with _id as string, or None if not found.
-    """
     try:
         obj_id = ObjectId(document_id)
     except Exception:
         raise ValueError("Invalid document ID format")
 
     podcast = PODCAST_COLLECTION.find_one({"_id": obj_id})
-    if not podcast:
-        return None
-
-    podcast["_id"] = str(podcast["_id"])
-    return dict(podcast)
+    return convert_id_to_str(podcast) if podcast else None
 
 
 def update_podcast_by_id(document_id: str, update_fields: dict):
-    """
-    Update a job by its _id and return the updated document as a dict.
-    """
     try:
         obj_id = ObjectId(document_id)
     except Exception:
@@ -59,9 +65,4 @@ def update_podcast_by_id(document_id: str, update_fields: dict):
         {"$set": update_fields},
         return_document=ReturnDocument.AFTER
     )
-    if not updated_doc:
-        return None
-
-    # Convert ObjectId to string for JSON compatibility
-    updated_doc["_id"] = str(updated_doc["_id"])
-    return dict(updated_doc)
+    return convert_id_to_str(updated_doc) if updated_doc else None

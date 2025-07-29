@@ -1,18 +1,27 @@
 :root {
   /* Background Colors */
-  --color-bg-primary: #000000;     /* Main background (deep black) */
-  --color-bg-secondary: #121212;   /* Secondary background */
-  --color-bg-hover: #1a1a1a;       /* Hover states */
-  --color-bg-card: #181818;        /* Card background */
+  --color-bg-primary: #000000;
+  /* Main background (deep black) */
+  --color-bg-secondary: #121212;
+  /* Secondary background */
+  --color-bg-hover: #1a1a1a;
+  /* Hover states */
+  --color-bg-card: #181818;
+  /* Card background */
 
   /* Accent Colors */
-  --color-accent: #1db954;         /* Spotify Green */
-  --color-accent-hover: #1ed760;   /* Slightly lighter green for hover */
+  --color-accent: #1db954;
+  /* Spotify Green */
+  --color-accent-hover: #1ed760;
+  /* Slightly lighter green for hover */
 
   /* Text Colors */
-  --color-text-primary: #ffffff;   /* Main text */
-  --color-text-secondary: #b3b3b3; /* Secondary text */
-  --color-text-muted: #737373;     /* Muted text */
+  --color-text-primary: #ffffff;
+  /* Main text */
+  --color-text-secondary: #b3b3b3;
+  /* Secondary text */
+  --color-text-muted: #737373;
+  /* Muted text */
 
   /* Border & Divider */
   --color-border: #282828;
@@ -36,4 +45,26 @@
   --color-success: #1db954;
   --color-warning: #f1c40f;
   --color-error: #e74c3c;
+
+  /* Ambient Flow Colors */
+  --color-ambient-start: #220520;
+  /* Deep plum */
+  --color-ambient-mid: #3e1545;
+  /* Muted warm purple */
+  --color-ambient-end: #121212;
+  /* Base dark */
+}
+
+@keyframes ambientFlow {
+  0% {
+    background: radial-gradient(circle at 25% 30%, var(--color-ambient-start) 0%, var(--color-ambient-end) 90%);
+  }
+
+  50% {
+    background: radial-gradient(circle at 70% 70%, var(--color-ambient-mid) 0%, var(--color-ambient-end) 90%);
+  }
+
+  100% {
+    background: radial-gradient(circle at 40% 50%, var(--color-ambient-start) 0%, var(--color-ambient-end) 90%);
+  }
 }

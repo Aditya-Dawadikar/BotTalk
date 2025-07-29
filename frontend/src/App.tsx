@@ -1,8 +1,20 @@
 import { useState } from 'react';
 import './App.css';
-import { Drawer, List, ListItem, ListItemButton, ListItemText, Box, Typography } from "@mui/material";
+import {
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  ListItemIcon,
+  Box,
+  Typography,
+  Divider,
+} from "@mui/material";
+import LibraryMusicIcon from '@mui/icons-material/LibraryMusic';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Library from './components/Library';
-import PodcastView from './components/PodcastView'; // Import PodcastView
+import PodcastView from './components/PodcastView';
 
 const drawerWidth = 240;
 
@@ -27,7 +39,9 @@ function App() {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{
+      display: "flex"
+    }}>
       {/* Sidebar */}
       <Drawer
         variant="permanent"
@@ -37,22 +51,58 @@ function App() {
           [`& .MuiDrawer-paper`]: {
             width: drawerWidth,
             boxSizing: "border-box",
-            backgroundColor: "#000",  // Spotify theme
+            backgroundColor: "#000",
             color: "#fff",
+            borderRight: "1px solid #222",
           },
         }}
       >
-        <Box sx={{ p: 2, textAlign: "center" }}>
-          <Typography variant="h6" color="primary">
-            BotTalk
+        <Box sx={{ p: 3, textAlign: "center" }}>
+          <Typography variant="h5" sx={{ fontWeight: "bold", letterSpacing: "1px" }}>
+            🎙 BotTalk
           </Typography>
         </Box>
+
+        <Divider sx={{ borderColor: "#333" }} />
+
         <List>
           <ListItem disablePadding>
-            <ListItemButton onClick={() => setActiveComponent("library")}>
+            <ListItemButton
+              onClick={() => setActiveComponent("library")}
+              selected={activeComponent === "library"}
+              sx={{
+                color: activeComponent === "library" ? "var(--color-accent)" : "#fff",
+                "&:hover": {
+                  backgroundColor: "#1a1a1a",
+                },
+              }}
+            >
+              <ListItemIcon sx={{ color: "inherit" }}>
+                <LibraryMusicIcon />
+              </ListItemIcon>
               <ListItemText primary="Library" />
             </ListItemButton>
           </ListItem>
+
+          {selectedPodcast && (
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => setActiveComponent("podcast")}
+                selected={activeComponent === "podcast"}
+                sx={{
+                  color: activeComponent === "podcast" ? "var(--color-accent)" : "#fff",
+                  "&:hover": {
+                    backgroundColor: "#1a1a1a",
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ color: "inherit" }}>
+                  <ArrowBackIcon />
+                </ListItemIcon>
+                <ListItemText primary="Now Playing" />
+              </ListItemButton>
+            </ListItem>
+          )}
         </List>
       </Drawer>
 
@@ -61,10 +111,11 @@ function App() {
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
           backgroundColor: "#121212",
           minHeight: "100vh",
           color: "#fff",
+          animation: "ambientFlow 25s ease-in-out infinite alternate",
+          background: "radial-gradient(circle at 40% 50%, var(--color-ambient-start) 0%, var(--color-ambient-end) 90%)",
         }}
       >
         {renderContent()}

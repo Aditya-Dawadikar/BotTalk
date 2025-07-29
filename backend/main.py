@@ -2,6 +2,7 @@ import os
 import threading
 from datetime import datetime, timezone
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from backend.routes.podcast_routes import podcast_router
 from backend.langchain.nodes.graph import graph
 from backend.services.job_service import add_job
@@ -13,11 +14,21 @@ OUTPUT_FOLDER = os.path.join(os.getcwd(),"outputs")
 
 app = FastAPI()
 
+origins=["http://localhost:5173"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(podcast_router)
 
 def run_graph_job(topic: str, job_id: str, podcast_id: str,output_folder: str):
     try:
-        graph.invoke({"topic": topic, "job_id": job_id, "output_folder": output_folder})
+        print("graph invoked")
+        graph.invoke({"topic": topic, "job_id": job_id, "podcast_id": podcast_id, "output_folder": output_folder})
         asyncio.run(upload_and_cleanup_job(job_id=job_id, podcast_id=podcast_id))
     except Exception as e:
         print(f"Error in graph job: {e}")
@@ -31,6 +42,7 @@ def trigger_podcast_job(topic:str):
     timestamp_str = utc_now.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
     res = add_job(job={
+        "status": "PENDING",
         "flow_generated": "no",
         "raw_script_generated": "no",
         "script_generated": "no",
@@ -45,6 +57,7 @@ def trigger_podcast_job(topic:str):
 
     podcast_res = add_podcast({
         "topic": topic,
+        "meta_data": None,
         "job_id": job_id,
         "status": "PENDING",
         "base_path": f"jobs/{job_id}",

@@ -68,7 +68,8 @@ async def upload_and_cleanup_job(job_id: str, podcast_id: str,s3_prefix="jobs"):
         })
 
         update_job_by_id(document_id=job_id, update_fields={
-            "end_timestamp": timestamp_str
+            "end_timestamp": timestamp_str,
+            "status": "COMPLETE"
         })
 
         # Delete folder (only runs after upload completes)

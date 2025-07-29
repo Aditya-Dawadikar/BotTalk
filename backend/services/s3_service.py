@@ -64,7 +64,11 @@ def generate_signed_urls(prefix: str, expiration: int = 3600):
             return signed_urls
 
         for obj in response['Contents']:
-            key = obj['Key'].split("/")[-1]
+            # key = obj['Key'].split("/")[-1]
+
+            # print(prefix+"/"+key)
+            key = obj['Key']
+
             try:
                 url = s3_client.generate_presigned_url(
                     'get_object',
@@ -78,6 +82,37 @@ def generate_signed_urls(prefix: str, expiration: int = 3600):
         return signed_urls
     except ClientError as e:
         print(f"[ERROR] Could not list objects for prefix {prefix}: {e}")
+        return {}
+
+def generate_signed_urls_batch(prefix_list: list, expiration: int = 3600):
+    """
+    Generate signed URLs for all files under a given S3 prefix.
+
+    Args:
+        prefix (str): The folder (prefix) in S3.
+        expiration (int): Expiration time for signed URL in seconds (default 1 hour).
+
+    Returns:
+        dict: { "file_key": "signed_url" }
+    """
+    signed_urls = {}
+
+    try:
+        
+        for key in prefix_list:
+            try:
+                url = s3_client.generate_presigned_url(
+                    'get_object',
+                    Params={'Bucket': S3_BUCKET_NAME, 'Key': key},
+                    ExpiresIn=expiration
+                )
+                signed_urls[key] = url
+            except ClientError as e:
+                print(f"Failed to generate URL for {key}: {e}")
+
+        return signed_urls
+    except ClientError as e:
+        print(f"[ERROR]: {e}")
         return {}
 
 def list_s3_files(prefix: str=""):
